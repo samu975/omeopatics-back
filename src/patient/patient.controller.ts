@@ -6,17 +6,26 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { PatientService } from './patient.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
+import { HashPasswordPipe } from 'src/pipes/hash-password.pipe';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('patient')
 export class PatientController {
   constructor(private readonly patientService: PatientService) {}
 
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'))
+  getProfile() {
+    return { message: 'Protected route' };
+  }
+
   @Post()
-  create(@Body() createPatientDto: CreatePatientDto) {
+  create(@Body(HashPasswordPipe) createPatientDto: CreatePatientDto) {
     return this.patientService.create(createPatientDto);
   }
 

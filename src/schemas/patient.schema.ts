@@ -5,20 +5,23 @@ export type PatientDocument = HydratedDocument<Patient>;
 
 @Schema()
 export class Patient {
-  @Prop()
+  @Prop({ required: true })
   name: string;
 
   @Prop()
   age: number;
 
-  @Prop()
+  @Prop({ required: true })
   email: string;
 
-  @Prop()
+  @Prop({ required: true })
   phoneNumber: string;
 
   @Prop()
   address: string;
+
+  @Prop({ required: true })
+  password: string;
 }
 
 export const PatientSchema = SchemaFactory.createForClass(Patient);

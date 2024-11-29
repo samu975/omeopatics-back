@@ -29,6 +29,14 @@ export class PatientService {
     return patient;
   }
 
+  async findByEmail(email: string): Promise<Patient> {
+    const patient = await this.patientModel.find({ email }).exec();
+    if (!patient) {
+      throw new NotFoundException(`Patient with email ${email} not found`);
+    }
+    return patient[0];
+  }
+
   async update(
     id: string,
     updatePatientDto: UpdatePatientDto,

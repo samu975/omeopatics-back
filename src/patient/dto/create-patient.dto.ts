@@ -13,6 +13,10 @@ export class CreatePatientDto {
   @IsPhoneNumber('CO', { message: 'Phone number must be valid' })
   phoneNumber: string;
 
+  @IsNotEmpty({ message: 'Password is required' })
+  @IsString({ message: 'Password must be a string' })
+  password: string;
+
   age?: number;
   address?: string;
 }
