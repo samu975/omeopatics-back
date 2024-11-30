@@ -14,11 +14,11 @@ export class PatientService {
 
   async create(createPatientDto: CreatePatientDto): Promise<Patient> {
     const createdPatient = new this.patientModel(createPatientDto);
-    return createdPatient.save();
+    return await createdPatient.save();
   }
 
   async findAll(): Promise<Patient[]> {
-    return this.patientModel.find().exec();
+    return await this.patientModel.find().exec();
   }
 
   async findOne(id: string): Promise<Patient> {
