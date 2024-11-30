@@ -7,13 +7,13 @@ import {
   MedicalFormulaDocument,
 } from 'src/schemas/medicalFormule.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Patient } from 'src/schemas/patient.schema';
+import { Patient, PatientDocument } from 'src/schemas/patient.schema';
 
 @Injectable()
 export class FormulaService {
   constructor(
     @InjectModel(Patient.name)
-    private readonly patientModel: Model<Patient>,
+    private readonly patientModel: Model<PatientDocument>,
     @InjectModel(MedicalFormula.name)
     private readonly formulaModel: Model<MedicalFormulaDocument>,
   ) {}
