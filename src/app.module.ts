@@ -1,20 +1,19 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-
 import { ConfigModule } from '@nestjs/config';
-import { PatientModule } from './patient/patient.module';
 import { AuthModule } from './auth/auth.module';
-import { FormulaModule } from './formula/formula.module';
-import { DoctorModule } from './doctor/doctor.module';
+import { UsersModule } from './users/users.module';
+import { FormulasModule } from './formulas/formulas.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MongooseModule.forRoot(process.env.MONGO_URI),
-    PatientModule,
     AuthModule,
-    FormulaModule,
-    DoctorModule,
+    UsersModule,
+    FormulasModule,
   ],
   controllers: [],
   providers: [],
