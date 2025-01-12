@@ -1,22 +1,24 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import { FollowUp, FollowUpSchema } from './followup.schema';
+import { Document, Schema as MongooseSchema } from 'mongoose';
+import { User } from './user.schema';
+import { Answer, AnswerSchema } from './answer.schema';
 
-export type FormulaDocument = Formula & Document;
-
-@Schema()
-export class Formula {
+@Schema({ timestamps: true })
+export class Formula extends Document {
   @Prop({ required: true })
   name: string;
 
   @Prop({ required: true })
   description: string;
 
-  @Prop({ type: [FollowUpSchema], default: [] })
-  followUps: FollowUp[];
+  @Prop({ type: Array, required: true })
+  questions: any[];
 
-  @Prop({ default: Date.now })
-  createdAt: Date;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
+  user: User;
+
+  @Prop({ type: [AnswerSchema], default: [] })
+  answers: Answer[];
 }
 
 export const FormulaSchema = SchemaFactory.createForClass(Formula); 

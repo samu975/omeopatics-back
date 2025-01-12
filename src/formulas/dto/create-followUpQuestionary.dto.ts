@@ -1,4 +1,4 @@
-export class CreateFollowUpDto {
+export class CreateFollowUpQuestionaryDto {
   questions: {
     id: number;
     title: string;

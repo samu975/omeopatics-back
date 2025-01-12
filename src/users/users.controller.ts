@@ -6,35 +6,36 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
-  Request,
 } from '@nestjs/common';
-import { JwtStrategy } from '../auth/jwt.strategy';
-import { RolesGuard } from '../auth/roles.guard';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('users')
-@UseGuards(JwtStrategy, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: any, @Request() req) {
-    return this.usersService.create(createUserDto, req.user);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.create(createUserDto);
   }
 
   @Get()
-  findAll(@Request() req) {
-    return this.usersService.findAll(req.user);
+  async findAll() {
+    return this.usersService.findAll();
+  }
+
+  @Get(':id')
+  async findById(@Param('id') id: string) {
+    return this.usersService.findById(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: any, @Request() req) {
-    return this.usersService.update(id, updateUserDto, req.user);
+  async update(@Param('id') id: string, @Body() updateUserDto: any) {
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Request() req) {
-    return this.usersService.remove(id, req.user);
+  async remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
   }
 }

@@ -1,36 +1,35 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User, UserDocument } from '../schemas/user.schema';
+import { User } from '../schemas/user.schema';
 import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async create(createUserDto: any, requestingUser: UserDocument) {
-    if (requestingUser.role !== 'admin') {
-      throw new UnauthorizedException(
-        'Solo administradores pueden crear usuarios',
-      );
+  async create(createUserDto: CreateUserDto) {
+    const { name, phone, password, role } = createUserDto;
+    
+    const existingUser = await this.userModel.findOne({ phone }).exec();
+    if (existingUser) {
+      throw new ConflictException('Ya existe un usuario registrado con este número de teléfono');
     }
-
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
     const createdUser = new this.userModel({
-      ...createUserDto,
+      name,
+      phone,
       password: hashedPassword,
+      role,
     });
 
-    return createdUser.save();
+    return await createdUser.save();
   }
 
-  async findAll(requestingUser: UserDocument) {
-    if (requestingUser.role !== 'admin') {
-      throw new UnauthorizedException(
-        'Solo administradores pueden ver todos los usuarios',
-      );
-    }
+  async findAll() {
     return this.userModel.find().exec();
   }
 
@@ -38,13 +37,11 @@ export class UsersService {
     return this.userModel.findOne({ phone }).exec();
   }
 
-  async update(id: string, updateUserDto: any, requestingUser: UserDocument) {
-    if (requestingUser.role !== 'admin') {
-      throw new UnauthorizedException(
-        'Solo administradores pueden actualizar usuarios',
-      );
-    }
+  async findById(id: string) {
+    return this.userModel.findById(id).exec();
+  }
 
+  async update(id: string, updateUserDto: any) {
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
@@ -54,12 +51,7 @@ export class UsersService {
       .exec();
   }
 
-  async remove(id: string, requestingUser: UserDocument) {
-    if (requestingUser.role !== 'admin') {
-      throw new UnauthorizedException(
-        'Solo administradores pueden eliminar usuarios',
-      );
-    }
+  async remove(id: string) {
     return this.userModel.findByIdAndDelete(id).exec();
   }
 }

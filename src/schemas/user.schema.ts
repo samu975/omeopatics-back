@@ -1,16 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { UserRole } from '../users/dto/create-user.dto';
 import { Formula } from './formula.schema';
 
-export type UserDocument = User & Document;
-
 @Schema()
-export class User {
+export class User extends Document {
   @Prop({ required: true })
   name: string;
-
-  @Prop({ required: true, enum: ['admin', 'patient'], default: 'patient' })
-  role: 'admin' | 'patient';
 
   @Prop({ required: true, unique: true })
   phone: string;
@@ -18,8 +14,8 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop()
-  token: string;
+  @Prop({ required: true, enum: UserRole, default: UserRole.PATIENT })
+  role: UserRole;
 
   @Prop({ type: [{ type: 'ObjectId', ref: 'Formula' }] })
   asignedFormulas: Formula[];

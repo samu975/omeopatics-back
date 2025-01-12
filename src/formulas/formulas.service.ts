@@ -1,63 +1,143 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Formula, FormulaDocument } from '../schemas/formula.schema';
+import { Formula } from '../schemas/formula.schema';
+import { User } from '../schemas/user.schema';
 
 @Injectable()
 export class FormulasService {
   constructor(
-    @InjectModel(Formula.name) private formulaModel: Model<FormulaDocument>
+    @InjectModel(Formula.name) private formulaModel: Model<Formula>,
+    @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
-  async create(createFormulaDto: any, userRole: string) {
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Solo administradores pueden crear fórmulas');
+  async createFormulaForUser(userId: string, createFormulaDto: {
+    name: string;
+    description: string;
+    questions: any[];
+  }) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
     }
-    const formula = new this.formulaModel(createFormulaDto);
-    return formula.save();
+
+    const newFormula = new this.formulaModel({
+      name: createFormulaDto.name,
+      description: createFormulaDto.description,
+      questions: createFormulaDto.questions,
+      user: userId,
+      answers: [],
+    });
+
+    const savedFormula = await newFormula.save();
+
+    await this.userModel.findByIdAndUpdate(
+      userId,
+      {
+        $push: { asignedFormulas: savedFormula._id }
+      },
+      { new: true }
+    );
+
+    return savedFormula;
   }
 
   async findAll() {
-    return this.formulaModel.find().exec();
+    return this.formulaModel
+      .find()
+      .populate('user')
+      .exec();
   }
 
-  async findOne(id: string) {
-    const formula = await this.formulaModel.findById(id).exec();
+  async findByUserId(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return this.formulaModel.find({ user: userId })
+      .populate('user', 'name phone role')
+      .select('name description questions answers createdAt')
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  async findById(id: string) {
+    const formula = await this.formulaModel
+      .findById(id)
+      .populate('user', 'name phone role')
+      .select('name description questions answers createdAt')
+      .exec();
+
     if (!formula) {
       throw new NotFoundException('Fórmula no encontrada');
     }
+
     return formula;
   }
 
-  async addFollowUp(id: string, followUpDto: any, userRole: string) {
-    if (userRole !== 'admin') {
-      throw new UnauthorizedException('Solo administradores pueden agregar seguimientos');
-    }
-    
-    const formula = await this.formulaModel.findById(id);
+  async addAnswer(formulaId: string, answer: any) {
+    const formula = await this.formulaModel.findById(formulaId);
     if (!formula) {
       throw new NotFoundException('Fórmula no encontrada');
     }
 
-    formula.followUps.push(followUpDto);
+    formula.answers.push(answer);
     return formula.save();
   }
 
-  async addAnswer(id: string, followUpIndex: number, answerDto: any) {
-    const formula = await this.formulaModel.findById(id);
+  async updateFormula(
+    formulaId: string,
+    updateFormulaDto: {
+      name?: string;
+      description?: string;
+      questions?: any[];
+    }
+  ) {
+    const formula = await this.formulaModel.findById(formulaId);
     if (!formula) {
       throw new NotFoundException('Fórmula no encontrada');
     }
 
-    if (!formula.followUps[followUpIndex]) {
-      throw new NotFoundException('Seguimiento no encontrado');
+    if (updateFormulaDto.name) {
+      formula.name = updateFormulaDto.name;
+    }
+    if (updateFormulaDto.description) {
+      formula.description = updateFormulaDto.description;
+    }
+    if (updateFormulaDto.questions) {
+      formula.questions = updateFormulaDto.questions;
     }
 
-    formula.followUps[followUpIndex].answers.push({
-      ...answerDto,
-      createdAt: new Date()
-    });
+    const updatedFormula = await formula.save();
 
-    return formula.save();
+    return this.formulaModel
+      .findById(updatedFormula._id)
+      .populate('user', 'name phone role')
+      .select('name description questions answers createdAt')
+      .exec();
+  }
+
+  async deleteFormula(formulaId: string) {
+    const formula = await this.formulaModel.findById(formulaId);
+    if (!formula) {
+      throw new NotFoundException('Fórmula no encontrada');
+    }
+
+    // Primero eliminamos la referencia de la fórmula en el usuario
+    await this.userModel.findByIdAndUpdate(
+      formula.user,
+      {
+        $pull: { asignedFormulas: formulaId }
+      }
+    );
+
+    // Luego eliminamos la fórmula
+    const deletedFormula = await this.formulaModel.findByIdAndDelete(formulaId);
+
+    return {
+      message: 'Fórmula eliminada correctamente',
+      formula: deletedFormula
+    };
   }
 } 

@@ -1,47 +1,63 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { FormulasService } from './formulas.service';
-import { JwtStrategy } from '../auth/jwt.strategy';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
 
 @Controller('formulas')
-@UseGuards(JwtStrategy, RolesGuard)
 export class FormulasController {
   constructor(private readonly formulasService: FormulasService) {}
-
-  @Post()
-  @Roles('admin')
-  create(@Body() createFormulaDto: any, @Request() req) {
-    return this.formulasService.create(createFormulaDto, req.user.role);
-  }
 
   @Get()
   findAll() {
     return this.formulasService.findAll();
   }
 
+  @Get('user/:userId')
+  async getFormulasByUserId(@Param('userId') userId: string) {
+    return this.formulasService.findByUserId(userId);
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.formulasService.findOne(id);
+  async findById(@Param('id') id: string) {
+    return this.formulasService.findById(id);
   }
 
   @Post(':id/followup')
-  @Roles('admin')
-  addFollowUp(
-    @Param('id') id: string,
-    @Body() followUpDto: any,
-    @Request() req
+  async createFormula(
+    @Param('id') userId: string,
+    @Body() createFormulaDto: {
+      name: string;
+      description: string;
+      questions: any[];
+    }
   ) {
-    return this.formulasService.addFollowUp(id, followUpDto, req.user.role);
+    return this.formulasService.createFormulaForUser(userId, createFormulaDto);
   }
 
-  @Post(':id/followup/:index/answer')
-  @Roles('patient')
-  addAnswer(
-    @Param('id') id: string,
-    @Param('index') index: number,
-    @Body() answerDto: any
+  @Post(':id/answer')
+  async addAnswer(
+    @Param('id') formulaId: string,
+    @Body() answerDto: {
+      question: any;
+      type: 'abierta' | 'multiple' | 'unica';
+      answer: string[];
+    }
   ) {
-    return this.formulasService.addAnswer(id, index, answerDto);
+    return this.formulasService.addAnswer(formulaId, answerDto);
+  }
+
+  @Patch(':id')
+  async updateFormula(
+    @Param('id') formulaId: string,
+    @Body() updateFormulaDto: {
+      name?: string;
+      description?: string;
+      questions?: any[];
+    }
+  ) {
+    return this.formulasService.updateFormula(formulaId, updateFormulaDto);
+  }
+
+  @Delete(':id')
+  async deleteFormula(@Param('id') formulaId: string) {
+    return this.formulasService.deleteFormula(formulaId);
   }
 } 
