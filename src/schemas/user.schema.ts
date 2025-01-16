@@ -12,6 +12,9 @@ export class User extends Document {
   phone: string;
 
   @Prop({ required: true })
+  cedula: string;
+
+  @Prop({ required: true })
   password: string;
 
   @Prop({ required: true, enum: UserRole, default: UserRole.PATIENT })

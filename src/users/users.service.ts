@@ -10,7 +10,7 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { name, phone, password, role } = createUserDto;
+    const { name, phone, password, cedula, role } = createUserDto;
     
     const existingUser = await this.userModel.findOne({ phone }).exec();
     if (existingUser) {
@@ -22,6 +22,7 @@ export class UsersService {
     const createdUser = new this.userModel({
       name,
       phone,
+      cedula,
       password: hashedPassword,
       role,
     });
