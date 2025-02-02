@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 
@@ -8,6 +8,10 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+    const user = await this.authService.validateUser(loginDto.cedula, loginDto.password);
+    if (!user) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+    return this.authService.login(user);
   }
 }

@@ -1,4 +1,4 @@
 export class LoginDto {
-  phone: string;
+  cedula: string;
   password: string;
 }

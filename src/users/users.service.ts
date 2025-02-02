@@ -38,6 +38,10 @@ export class UsersService {
     return this.userModel.findOne({ phone }).exec();
   }
 
+  async findByCedula(cedula: string) {
+    return this.userModel.findOne({ cedula }).exec();
+  }
+
   async findById(id: string) {
     return this.userModel.findById(id).exec();
   }
