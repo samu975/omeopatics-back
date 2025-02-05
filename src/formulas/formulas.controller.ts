@@ -33,17 +33,18 @@ export class FormulasController {
   }
 
   @Post(':id/answer')
-  async addAnswer(
-    @Param('id') formulaId: string,
-    @Body() answerDto: {
-      question: any;
-      type: 'abierta' | 'multiple' | 'unica';
-      answer: string[];
+    async addAnswer(
+      @Param('id') formulaId: string,
+      @Body() answersDto: {
+        answers: Array<{
+          question: string;
+          type: 'abierta' | 'multiple' | 'unica';
+          answer: string[];
+        }>
+      }
+    ) {
+      return this.formulasService.addAnswer(formulaId, answersDto);
     }
-  ) {
-    return this.formulasService.addAnswer(formulaId, answerDto);
-  }
-
   @Patch(':id')
   async updateFormula(
     @Param('id') formulaId: string,
@@ -60,4 +61,4 @@ export class FormulasController {
   async deleteFormula(@Param('id') formulaId: string) {
     return this.formulasService.deleteFormula(formulaId);
   }
-} 
+}

@@ -76,15 +76,57 @@ export class FormulasService {
     return formula;
   }
 
-  async addAnswer(formulaId: string, answer: any) {
-    const formula = await this.formulaModel.findById(formulaId);
-    if (!formula) {
-      throw new NotFoundException('Fórmula no encontrada');
+  async addAnswer(formulaId: string, answersDto: { answers: Array<{
+      question: string;
+      type: 'abierta' | 'multiple' | 'unica';
+      answer: string[];
+    }>}) {
+      const formula = await this.formulaModel.findById(formulaId);
+      if (!formula) {
+        throw new NotFoundException('Fórmula no encontrada');
+      }
+  
+      const { answers } = answersDto;
+      
+      if (!Array.isArray(answers)) {
+        throw new NotFoundException('El formato de las respuestas es inválido');
+      }
+  
+      for (const answer of answers) {
+        if (!answer.question || !answer.type || !Array.isArray(answer.answer)) {
+          throw new NotFoundException('Formato de respuesta inválido');
+        }
+  
+        const matchingQuestion = formula.questions.find(
+          (q: any) => q.title === answer.question && q.type === answer.type
+        );
+  
+        if (!matchingQuestion) {
+          throw new NotFoundException(`La pregunta "${answer.question}" no existe en esta fórmula o el tipo no coincide`);
+        }
+  
+        if ((answer.type === 'abierta' || answer.type === 'unica') && answer.answer.length !== 1) {
+          throw new Error(`La pregunta "${answer.question}" debe tener una única respuesta`);
+        }
+  
+        const newAnswer = {
+          question: matchingQuestion,
+          type: answer.type,
+          answer: answer.answer,
+          createdAt: new Date()
+        };
+  
+        formula.answers.push(newAnswer);
+      }
+  
+      const updatedFormula = await formula.save();
+  
+      return this.formulaModel
+        .findById(updatedFormula._id)
+        .populate('user', 'name phone role')
+        .select('name description questions answers createdAt')
+        .exec();
     }
-
-    formula.answers.push(answer);
-    return formula.save();
-  }
 
   async updateFormula(
     formulaId: string,
@@ -124,7 +166,6 @@ export class FormulasService {
       throw new NotFoundException('Fórmula no encontrada');
     }
 
-    // Primero eliminamos la referencia de la fórmula en el usuario
     await this.userModel.findByIdAndUpdate(
       formula.user,
       {
@@ -132,7 +173,6 @@ export class FormulasService {
       }
     );
 
-    // Luego eliminamos la fórmula
     const deletedFormula = await this.formulaModel.findByIdAndDelete(formulaId);
 
     return {
@@ -140,4 +180,4 @@ export class FormulasService {
       formula: deletedFormula
     };
   }
-} 
+}

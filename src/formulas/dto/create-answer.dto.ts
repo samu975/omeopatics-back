@@ -1,9 +1,5 @@
 export class CreateAnswerDto {
-  question: {
-    id: number;
-    title: string;
-    type: 'abierta' | 'multiple' | 'unica';
-  };
+  question: string;
   type: 'abierta' | 'multiple' | 'unica';
-  answer: string[];
-} 
+  answer: string | string[];
+}

@@ -3,10 +3,10 @@ import { Question, QuestionSchema } from './question.schema';
 
 @Schema()
 export class Answer {
-  @Prop({ type: QuestionSchema, required: true })
+  @Prop({ type: QuestionSchema })
   question: Question;
 
-  @Prop({ required: true, enum: ['abierta', 'multiple', 'unica'] })
+  @Prop({ enum: ['abierta', 'multiple', 'unica'] })
   type: 'abierta' | 'multiple' | 'unica';
 
   @Prop({ type: [String], required: true })
