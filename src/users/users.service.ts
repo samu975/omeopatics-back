@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../schemas/user.schema';
@@ -12,26 +12,39 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     const { name, phone, password, cedula, role } = createUserDto;
     
-    const existingUser = await this.userModel.findOne({ phone }).exec();
+    const existingUser = await this.userModel.findOne({ cedula }).exec();
     if (existingUser) {
-      throw new ConflictException('Ya existe un usuario registrado con este número de teléfono');
+      console.log('Usuario existente encontrado:', {
+        cedula: existingUser.cedula,
+        phone: existingUser.phone
+      });
+      throw new ConflictException('Ya existe un usuario registrado con este número de cédula');
     }
     
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const createdUser = new this.userModel({
-      name,
-      phone,
-      cedula,
-      password: hashedPassword,
-      role,
-    });
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      const createdUser = new this.userModel({
+        name,
+        phone,
+        cedula,
+        password: hashedPassword,
+        role,
+      });
 
-    return await createdUser.save();
+      return await createdUser.save();
+    } catch (error) {
+      console.log('Error al crear usuario:', error);
+      throw error;
+    }
   }
 
   async findAll() {
-    return this.userModel.find().exec();
+    const patients = await this.userModel.find({ role: 'patient' }).exec();
+    if (!patients.length) {
+      throw new NotFoundException('No se encontraron pacientes');
+    }
+    return patients;
   }
 
   async findByPhone(phone: string) {
@@ -43,7 +56,11 @@ export class UsersService {
   }
 
   async findById(id: string) {
-    return this.userModel.findById(id).exec();
+    const user = await this.userModel.findOne({ _id: id, role: 'patient' }).exec();
+    if (!user) {
+      throw new NotFoundException('Usuario paciente no encontrado');
+    }
+    return user;
   }
 
   async update(id: string, updateUserDto: any) {

@@ -12,7 +12,7 @@ export class MongoExceptionFilter implements ExceptionFilter {
       case 11000:
         return response.status(HttpStatus.CONFLICT).json({
           statusCode: HttpStatus.CONFLICT,
-          message: 'Ya existe un usuario registrado con este número de teléfono',
+          message: 'Ya existe un usuario registrado con este número de cédula',
           error: 'Conflict',
         });
       default:

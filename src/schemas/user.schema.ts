@@ -8,10 +8,10 @@ export class User extends Document {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   phone: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   cedula: string;
 
   @Prop({ required: true })
@@ -25,3 +25,8 @@ export class User extends Document {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+// Agregar esto después de crear el esquema
+UserSchema.index({ cedula: 1 }, { unique: true });
+// Eliminar cualquier otro índice único que pueda existir
+UserSchema.index({ phone: 1 }, { unique: false });
