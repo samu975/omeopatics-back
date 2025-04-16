@@ -26,6 +26,7 @@ export class FormulasController {
     @Body() createFormulaDto: {
       name: string;
       description: string;
+      dosis: string;
       questions: any[];
     }
   ) {
@@ -51,6 +52,7 @@ export class FormulasController {
     @Body() updateFormulaDto: {
       name?: string;
       description?: string;
+      dosis?: string;
       questions?: any[];
     }
   ) {

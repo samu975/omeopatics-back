@@ -14,6 +14,7 @@ export class FormulasService {
   async createFormulaForUser(userId: string, createFormulaDto: {
     name: string;
     description: string;
+    dosis: string;
     questions: any[];
   }) {
     const user = await this.userModel.findById(userId);
@@ -24,6 +25,7 @@ export class FormulasService {
     const newFormula = new this.formulaModel({
       name: createFormulaDto.name,
       description: createFormulaDto.description,
+      dosis: createFormulaDto.dosis,
       questions: createFormulaDto.questions,
       user: userId,
       answers: [],
@@ -57,7 +59,7 @@ export class FormulasService {
 
     return this.formulaModel.find({ user: userId })
       .populate('user', 'name phone role')
-      .select('name description questions answers createdAt')
+      .select('name description dosis questions answers createdAt')
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -66,7 +68,7 @@ export class FormulasService {
     const formula = await this.formulaModel
       .findById(id)
       .populate('user', 'name phone role')
-      .select('name description questions answers createdAt')
+      .select('name description dosis questions answers createdAt')
       .exec();
 
     if (!formula) {
@@ -124,7 +126,7 @@ export class FormulasService {
       return this.formulaModel
         .findById(updatedFormula._id)
         .populate('user', 'name phone role')
-        .select('name description questions answers createdAt')
+        .select('name description dosis questions answers createdAt')
         .exec();
     }
 
@@ -133,6 +135,7 @@ export class FormulasService {
     updateFormulaDto: {
       name?: string;
       description?: string;
+      dosis?: string;
       questions?: any[];
     }
   ) {
@@ -147,6 +150,9 @@ export class FormulasService {
     if (updateFormulaDto.description) {
       formula.description = updateFormulaDto.description;
     }
+    if (updateFormulaDto.dosis) {
+      formula.dosis = updateFormulaDto.dosis;
+    }
     if (updateFormulaDto.questions) {
       formula.questions = updateFormulaDto.questions;
     }
@@ -156,7 +162,7 @@ export class FormulasService {
     return this.formulaModel
       .findById(updatedFormula._id)
       .populate('user', 'name phone role')
-      .select('name description questions answers createdAt')
+      .select('name description dosis questions answers createdAt')
       .exec();
   }
 

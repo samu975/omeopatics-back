@@ -11,6 +11,9 @@ export class Formula extends Document {
   @Prop({ required: true })
   description: string;
 
+  @Prop({ required: true})
+  dosis: string;
+
   @Prop({ type: Array, required: true })
   questions: any[];
 
