@@ -22,14 +22,19 @@ export class AuthService {
   async login(user: any) {
     const payload = { cedula: user.cedula, sub: user._id, role: user.role };
     return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        _id: user._id,
-        name: user.name,
-        cedula: user.cedula,
-        phone: user.phone,
-        role: user.role,
-      },
+      message: 'Login exitoso',
+      status: 200,
+      data: {
+        access_token: this.jwtService.sign(payload),
+        user: {
+          _id: user._id,
+          name: user.name,
+          cedula: user.cedula,
+          phone: user.phone,
+          role: user.role,
+        },
+      }
+     
     };
-  }
+  } 
 }

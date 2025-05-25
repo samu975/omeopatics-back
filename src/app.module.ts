@@ -10,7 +10,7 @@ import { FormulasModule } from './formulas/formulas.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MongooseModule.forRoot(process.env.MONGO_URI),
+    MongooseModule.forRoot(process.env.MONGODB_URI),
     AuthModule,
     UsersModule,
     FormulasModule,
