@@ -18,10 +18,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
+  // Configuración simplificada para desarrollo
   app.enableCors({
-    origin: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
+    origin: '*',
+    methods: '*',
+    allowedHeaders: '*',
   });
 
   app.setGlobalPrefix('api/v1');
