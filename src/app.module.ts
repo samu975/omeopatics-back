@@ -4,6 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { FormulasModule } from './formulas/formulas.module';
+import { HistorialModule } from './historial/historial.module';
+import { QuestionBanksModule } from './question-banks/question-banks.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { FormulasModule } from './formulas/formulas.module';
     AuthModule,
     UsersModule,
     FormulasModule,
+    HistorialModule,
+    QuestionBanksModule,
   ],
   controllers: [],
   providers: [],

@@ -189,4 +189,15 @@ export class QuestionBanksController {
   removeQuestion(@Param('id') id: string, @Param('questionId') questionId: number) {
     return this.questionBanksService.removeQuestion(id, questionId);
   }
+
+  @Get(':id/questions')
+  @ApiOperation({ summary: 'Obtener preguntas de un banco específico' })
+  @ApiParam({ name: 'id', description: 'ID del banco de preguntas' })
+  @ApiResponse({
+    status: 200,
+    description: 'Preguntas del banco obtenidas exitosamente',
+  })
+  getQuestions(@Param('id') id: string) {
+    return this.questionBanksService.getQuestions(id);
+  }
 } 

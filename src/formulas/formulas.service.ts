@@ -5,6 +5,7 @@ import { Formula } from '../schemas/formula.schema';
 import { User } from '../schemas/user.schema';
 import { QuestionBank } from '../schemas/questionBank.schema';
 import { FollowUpResponse } from '../schemas/followUpResponse.schema';
+import { CreateFormulaDto } from './dto/create-formula.dto';
 
 @Injectable()
 export class FormulasService {
@@ -243,5 +244,10 @@ export class FormulasService {
       message: 'Fórmula eliminada correctamente',
       formula: deletedFormula
     };
+  }
+
+  async create(createFormulaDto: CreateFormulaDto) {
+    // Lógica para crear la fórmula
+    return await this.formulaModel.create(createFormulaDto);
   }
 }

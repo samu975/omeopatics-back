@@ -128,4 +128,8 @@ export class HistorialService {
       historial
     };
   }
+
+  async findByPatient(patientId: string, user: any) {
+    return await this.findByPatientId(patientId, user);
+  }
 } 

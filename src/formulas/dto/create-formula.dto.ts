@@ -1,38 +1,37 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsMongoId } from 'class-validator';
 
 export class CreateFormulaDto {
   @ApiProperty({
     description: 'Nombre de la fórmula médica',
-    example: 'Acetaminofén 500mg',
+    example: 'Fórmula de IMC',
   })
   @IsString()
   @IsNotEmpty()
   name: string;
 
   @ApiProperty({
-    description: 'Descripción detallada de la fórmula',
-    example: 'Analgésico y antipirético para el tratamiento del dolor y la fiebre',
+    description: 'Descripción de la fórmula',
+    example: 'Cálculo del Índice de Masa Corporal',
   })
   @IsString()
   @IsNotEmpty()
   description: string;
 
   @ApiProperty({
-    description: 'Dosis y frecuencia de administración',
-    example: '1 tableta cada 8 horas por 5 días',
+    description: 'Fórmula matemática',
+    example: 'peso / (altura^2)',
   })
   @IsString()
   @IsNotEmpty()
-  dosis: string;
+  formula: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'ID del banco de preguntas para seguimiento (opcional)',
-    example: '507f1f77bcf86cd799439011',
-    required: false,
+    example: '64a7b8c9d1e2f3a4b5c6d7e8',
   })
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   followUpQuestionBankId?: string;
 
   @ApiProperty({

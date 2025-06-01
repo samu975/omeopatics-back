@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { FormulasService } from './formulas.service';
+import { CreateFormulaDto } from './dto/create-formula.dto';
 
 @ApiTags('Formulas')
 @ApiBearerAuth('JWT-auth')
@@ -65,47 +66,16 @@ export class FormulasController {
     return this.formulasService.findById(id);
   }
 
-  @ApiOperation({
-    summary: 'Crear fórmula para usuario',
-    description: 'Crea una nueva fórmula médica y la asigna a un usuario específico',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'ID del usuario al que se asignará la fórmula',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', example: 'Acetaminofén 500mg' },
-        description: { type: 'string', example: 'Analgésico para dolor de cabeza' },
-        dosis: { type: 'string', example: '1 tableta cada 8 horas' },
-        followUpQuestionBankId: { type: 'string', example: '507f1f77bcf86cd799439011' },
-        hasFollowUpNotifications: { type: 'boolean', example: true },
-      },
-    },
-  })
+  @Post('create')
+  @ApiOperation({ summary: 'Crear nueva fórmula médica' })
   @ApiResponse({
     status: 201,
     description: 'Fórmula creada exitosamente',
+    type: CreateFormulaDto,
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Usuario o banco de preguntas no encontrado',
-  })
-  @Post(':id/followup')
-  async createFormula(
-    @Param('id') userId: string,
-    @Body() createFormulaDto: {
-      name: string;
-      description: string;
-      dosis: string;
-      followUpQuestionBankId?: string;
-      hasFollowUpNotifications?: boolean;
-    }
-  ) {
-    return this.formulasService.createFormulaForUser(userId, createFormulaDto);
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
+  create(@Body() createFormulaDto: CreateFormulaDto) {
+    return this.formulasService.create(createFormulaDto);
   }
 
   @ApiOperation({

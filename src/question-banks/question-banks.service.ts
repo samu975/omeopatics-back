@@ -84,4 +84,12 @@ export class QuestionBanksService {
     questionBank.questions = questionBank.questions.filter(q => q.id !== questionId);
     return questionBank.save();
   }
+
+  async getQuestions(id: string) {
+    const questionBank = await this.questionBankModel.findById(id);
+    if (!questionBank) {
+      throw new NotFoundException('Banco de preguntas no encontrado');
+    }
+    return questionBank.questions;
+  }
 } 

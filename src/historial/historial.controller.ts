@@ -13,17 +13,17 @@ export class HistorialController {
   constructor(private readonly historialService: HistorialService) {}
 
   @ApiOperation({
-    summary: 'Crear nuevo historial médico',
+    summary: 'Crear nuevo registro en historial médico',
     description: 'Crea un nuevo registro en el historial médico de un paciente. Solo accesible por Admin y Doctor.',
   })
   @ApiBody({ type: CreateHistorialDto })
   @ApiResponse({
     status: 201,
-    description: 'Historial médico creado exitosamente',
+    description: 'Registro de historial creado exitosamente',
   })
   @ApiResponse({
     status: 403,
-    description: 'Acceso denegado - Solo Admin y Doctor pueden crear historiales',
+    description: 'Acceso denegado - Solo Admin y Doctor pueden crear registros',
   })
   @ApiResponse({
     status: 404,
@@ -35,16 +35,16 @@ export class HistorialController {
   }
 
   @ApiOperation({
-    summary: 'Obtener todos los historiales médicos',
-    description: 'Devuelve una lista de todos los historiales médicos. Solo accesible por Admin y Doctor.',
+    summary: 'Obtener todos los registros del historial',
+    description: 'Devuelve una lista de todos los registros del historial médico. Solo accesible por Admin y Doctor.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Lista de historiales obtenida exitosamente',
+    description: 'Lista de registros del historial obtenida exitosamente',
   })
   @ApiResponse({
     status: 403,
-    description: 'Acceso denegado - Solo Admin y Doctor pueden ver historiales',
+    description: 'Acceso denegado - Solo Admin y Doctor pueden ver registros',
   })
   @Get()
   findAll(@Request() req) {
@@ -52,7 +52,7 @@ export class HistorialController {
   }
 
   @ApiOperation({
-    summary: 'Obtener historial médico por paciente',
+    summary: 'Obtener historial de un paciente específico',
     description: 'Devuelve el historial médico completo de un paciente específico. Solo accesible por Admin y Doctor.',
   })
   @ApiParam({
@@ -73,30 +73,30 @@ export class HistorialController {
     description: 'Paciente no encontrado',
   })
   @Get('patient/:patientId')
-  findByPatientId(@Param('patientId') patientId: string, @Request() req) {
+  findByPatient(@Param('patientId') patientId: string, @Request() req) {
     return this.historialService.findByPatientId(patientId, req.user);
   }
 
   @ApiOperation({
-    summary: 'Obtener historial médico específico',
+    summary: 'Obtener registro específico del historial',
     description: 'Devuelve un registro específico del historial médico. Solo accesible por Admin y Doctor.',
   })
   @ApiParam({
     name: 'id',
-    description: 'ID del historial médico',
+    description: 'ID del registro',
     example: '507f1f77bcf86cd799439011',
   })
   @ApiResponse({
     status: 200,
-    description: 'Historial médico encontrado',
+    description: 'Registro encontrado exitosamente',
   })
   @ApiResponse({
     status: 403,
-    description: 'Acceso denegado - Solo Admin y Doctor pueden ver historiales',
+    description: 'Acceso denegado - Solo Admin y Doctor pueden ver registros',
   })
   @ApiResponse({
     status: 404,
-    description: 'Historial no encontrado',
+    description: 'Registro no encontrado',
   })
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req) {
@@ -104,26 +104,26 @@ export class HistorialController {
   }
 
   @ApiOperation({
-    summary: 'Actualizar historial médico',
+    summary: 'Actualizar registro del historial',
     description: 'Actualiza un registro del historial médico. Solo accesible por Admin y Doctor.',
   })
   @ApiParam({
     name: 'id',
-    description: 'ID del historial médico a actualizar',
+    description: 'ID del registro',
     example: '507f1f77bcf86cd799439011',
   })
   @ApiBody({ type: UpdateHistorialDto })
   @ApiResponse({
     status: 200,
-    description: 'Historial médico actualizado exitosamente',
+    description: 'Registro actualizado exitosamente',
   })
   @ApiResponse({
     status: 403,
-    description: 'Acceso denegado - Solo Admin y Doctor pueden actualizar historiales',
+    description: 'Acceso denegado - Solo Admin y Doctor pueden actualizar registros',
   })
   @ApiResponse({
     status: 404,
-    description: 'Historial no encontrado',
+    description: 'Registro no encontrado',
   })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateHistorialDto: UpdateHistorialDto, @Request() req) {
@@ -131,25 +131,25 @@ export class HistorialController {
   }
 
   @ApiOperation({
-    summary: 'Eliminar historial médico',
+    summary: 'Eliminar registro del historial',
     description: 'Elimina un registro del historial médico. Solo accesible por Admin y Doctor.',
   })
   @ApiParam({
     name: 'id',
-    description: 'ID del historial médico a eliminar',
+    description: 'ID del registro',
     example: '507f1f77bcf86cd799439011',
   })
   @ApiResponse({
     status: 200,
-    description: 'Historial médico eliminado exitosamente',
+    description: 'Registro eliminado exitosamente',
   })
   @ApiResponse({
     status: 403,
-    description: 'Acceso denegado - Solo Admin y Doctor pueden eliminar historiales',
+    description: 'Acceso denegado - Solo Admin y Doctor pueden eliminar registros',
   })
   @ApiResponse({
     status: 404,
-    description: 'Historial no encontrado',
+    description: 'Registro no encontrado',
   })
   @Delete(':id')
   remove(@Param('id') id: string, @Request() req) {
