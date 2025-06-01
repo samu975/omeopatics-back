@@ -1,7 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 import { UserRole } from '../users/dto/create-user.dto';
 import { Formula } from './formula.schema';
+import { Historial } from './historial.schema';
 
 @Schema()
 export class User extends Document {
@@ -20,8 +21,11 @@ export class User extends Document {
   @Prop({ required: true, enum: UserRole, default: UserRole.PATIENT })
   role: UserRole;
 
-  @Prop({ type: [{ type: 'ObjectId', ref: 'Formula' }] })
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Formula' }] })
   asignedFormulas: Formula[];
+
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Historial' }], default: [] })
+  historial: Historial[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

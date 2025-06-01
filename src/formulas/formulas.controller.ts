@@ -27,25 +27,32 @@ export class FormulasController {
       name: string;
       description: string;
       dosis: string;
-      questions: any[];
+      followUpQuestionBankId?: string;
+      hasFollowUpNotifications?: boolean;
     }
   ) {
     return this.formulasService.createFormulaForUser(userId, createFormulaDto);
   }
 
-  @Post(':id/answer')
-    async addAnswer(
-      @Param('id') formulaId: string,
-      @Body() answersDto: {
-        answers: Array<{
-          question: string;
-          type: 'abierta' | 'multiple' | 'unica';
-          answer: string[];
-        }>
-      }
-    ) {
-      return this.formulasService.addAnswer(formulaId, answersDto);
+  @Post(':id/followup-response')
+  async addFollowUpResponse(
+    @Param('id') formulaId: string,
+    @Body() answersDto: {
+      answers: Array<{
+        questionId: number;
+        type: 'abierta' | 'multiple' | 'unica';
+        answer: string[];
+      }>
     }
+  ) {
+    return this.formulasService.addFollowUpResponse(formulaId, answersDto);
+  }
+
+  @Get(':id/followup-responses')
+  async getFollowUpResponses(@Param('id') formulaId: string) {
+    return this.formulasService.getFollowUpResponses(formulaId);
+  }
+
   @Patch(':id')
   async updateFormula(
     @Param('id') formulaId: string,
@@ -53,7 +60,8 @@ export class FormulasController {
       name?: string;
       description?: string;
       dosis?: string;
-      questions?: any[];
+      followUpQuestionBankId?: string;
+      hasFollowUpNotifications?: boolean;
     }
   ) {
     return this.formulasService.updateFormula(formulaId, updateFormulaDto);

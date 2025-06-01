@@ -3,6 +3,7 @@ import { IsString, IsEnum, IsNotEmpty } from 'class-validator';
 export enum UserRole {
   PATIENT = 'patient',
   ADMIN = 'admin',
+  DOCTOR = 'doctor',
 }
 
 export class CreateUserDto {

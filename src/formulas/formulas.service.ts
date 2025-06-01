@@ -3,32 +3,45 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Formula } from '../schemas/formula.schema';
 import { User } from '../schemas/user.schema';
+import { QuestionBank } from '../schemas/questionBank.schema';
+import { FollowUpResponse } from '../schemas/followUpResponse.schema';
 
 @Injectable()
 export class FormulasService {
   constructor(
     @InjectModel(Formula.name) private formulaModel: Model<Formula>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(QuestionBank.name) private questionBankModel: Model<QuestionBank>,
+    @InjectModel(FollowUpResponse.name) private followUpResponseModel: Model<FollowUpResponse>,
   ) {}
 
   async createFormulaForUser(userId: string, createFormulaDto: {
     name: string;
     description: string;
     dosis: string;
-    questions: any[];
+    followUpQuestionBankId?: string;
+    hasFollowUpNotifications?: boolean;
   }) {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
+    let followUpQuestionBank = null;
+    if (createFormulaDto.followUpQuestionBankId) {
+      followUpQuestionBank = await this.questionBankModel.findById(createFormulaDto.followUpQuestionBankId);
+      if (!followUpQuestionBank) {
+        throw new NotFoundException('Banco de preguntas no encontrado');
+      }
+    }
+
     const newFormula = new this.formulaModel({
       name: createFormulaDto.name,
       description: createFormulaDto.description,
       dosis: createFormulaDto.dosis,
-      questions: createFormulaDto.questions,
       user: userId,
-      answers: [],
+      followUpQuestionBank: followUpQuestionBank?._id,
+      hasFollowUpNotifications: createFormulaDto.hasFollowUpNotifications || false,
     });
 
     const savedFormula = await newFormula.save();
@@ -41,13 +54,18 @@ export class FormulasService {
       { new: true }
     );
 
-    return savedFormula;
+    return this.formulaModel
+      .findById(savedFormula._id)
+      .populate('user', 'name phone role')
+      .populate('followUpQuestionBank')
+      .exec();
   }
 
   async findAll() {
     return this.formulaModel
       .find()
       .populate('user')
+      .populate('followUpQuestionBank')
       .exec();
   }
 
@@ -59,7 +77,8 @@ export class FormulasService {
 
     return this.formulaModel.find({ user: userId })
       .populate('user', 'name phone role')
-      .select('name description dosis questions answers createdAt')
+      .populate('followUpQuestionBank')
+      .select('name description dosis followUpQuestionBank hasFollowUpNotifications createdAt')
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -68,7 +87,8 @@ export class FormulasService {
     const formula = await this.formulaModel
       .findById(id)
       .populate('user', 'name phone role')
-      .select('name description dosis questions answers createdAt')
+      .populate('followUpQuestionBank')
+      .select('name description dosis followUpQuestionBank hasFollowUpNotifications createdAt')
       .exec();
 
     if (!formula) {
@@ -78,57 +98,89 @@ export class FormulasService {
     return formula;
   }
 
-  async addAnswer(formulaId: string, answersDto: { answers: Array<{
-      question: string;
+  async addFollowUpResponse(formulaId: string, answersDto: { answers: Array<{
+      questionId: number;
       type: 'abierta' | 'multiple' | 'unica';
       answer: string[];
     }>}) {
-      const formula = await this.formulaModel.findById(formulaId);
+      const formula = await this.formulaModel
+        .findById(formulaId)
+        .populate('followUpQuestionBank')
+        .exec();
+        
       if (!formula) {
         throw new NotFoundException('Fórmula no encontrada');
       }
-  
+
+      if (!formula.followUpQuestionBank) {
+        throw new NotFoundException('Esta fórmula no tiene banco de preguntas de seguimiento asignado');
+      }
+
       const { answers } = answersDto;
       
       if (!Array.isArray(answers)) {
         throw new NotFoundException('El formato de las respuestas es inválido');
       }
-  
+
+      const processedAnswers = [];
+
       for (const answer of answers) {
-        if (!answer.question || !answer.type || !Array.isArray(answer.answer)) {
+        if (!answer.questionId || !answer.type || !Array.isArray(answer.answer)) {
           throw new NotFoundException('Formato de respuesta inválido');
         }
-  
-        const matchingQuestion = formula.questions.find(
-          (q: any) => q.title === answer.question && q.type === answer.type
+
+        const matchingQuestion = formula.followUpQuestionBank.questions.find(
+          (q: any) => q.id === answer.questionId && q.type === answer.type
         );
-  
+
         if (!matchingQuestion) {
-          throw new NotFoundException(`La pregunta "${answer.question}" no existe en esta fórmula o el tipo no coincide`);
+          throw new NotFoundException(`La pregunta con ID "${answer.questionId}" no existe en este banco de preguntas o el tipo no coincide`);
         }
-  
+
         if ((answer.type === 'abierta' || answer.type === 'unica') && answer.answer.length !== 1) {
-          throw new Error(`La pregunta "${answer.question}" debe tener una única respuesta`);
+          throw new Error(`La pregunta con ID "${answer.questionId}" debe tener una única respuesta`);
         }
-  
-        const newAnswer = {
+
+        processedAnswers.push({
           question: matchingQuestion,
           type: answer.type,
           answer: answer.answer,
           createdAt: new Date()
-        };
-  
-        formula.answers.push(newAnswer);
+        });
       }
-  
-      const updatedFormula = await formula.save();
-  
-      return this.formulaModel
-        .findById(updatedFormula._id)
-        .populate('user', 'name phone role')
-        .select('name description dosis questions answers createdAt')
+
+      const newFollowUpResponse = new this.followUpResponseModel({
+        patient: formula.user,
+        formula: formulaId,
+        questionBank: formula.followUpQuestionBank._id,
+        answers: processedAnswers,
+        responseDate: new Date()
+      });
+
+      const savedResponse = await newFollowUpResponse.save();
+
+      return this.followUpResponseModel
+        .findById(savedResponse._id)
+        .populate('patient', 'name phone cedula')
+        .populate('formula', 'name description')
+        .populate('questionBank', 'name description')
         .exec();
     }
+
+  async getFollowUpResponses(formulaId: string) {
+    const formula = await this.formulaModel.findById(formulaId);
+    if (!formula) {
+      throw new NotFoundException('Fórmula no encontrada');
+    }
+
+    return this.followUpResponseModel
+      .find({ formula: formulaId })
+      .populate('patient', 'name phone cedula')
+      .populate('formula', 'name description')
+      .populate('questionBank', 'name description')
+      .sort({ responseDate: -1 })
+      .exec();
+  }
 
   async updateFormula(
     formulaId: string,
@@ -136,7 +188,8 @@ export class FormulasService {
       name?: string;
       description?: string;
       dosis?: string;
-      questions?: any[];
+      followUpQuestionBankId?: string;
+      hasFollowUpNotifications?: boolean;
     }
   ) {
     const formula = await this.formulaModel.findById(formulaId);
@@ -144,17 +197,19 @@ export class FormulasService {
       throw new NotFoundException('Fórmula no encontrada');
     }
 
-    if (updateFormulaDto.name) {
-      formula.name = updateFormulaDto.name;
+    if (updateFormulaDto.followUpQuestionBankId) {
+      const questionBank = await this.questionBankModel.findById(updateFormulaDto.followUpQuestionBankId);
+      if (!questionBank) {
+        throw new NotFoundException('Banco de preguntas no encontrado');
+      }
+      formula.followUpQuestionBank = updateFormulaDto.followUpQuestionBankId as any;
     }
-    if (updateFormulaDto.description) {
-      formula.description = updateFormulaDto.description;
-    }
-    if (updateFormulaDto.dosis) {
-      formula.dosis = updateFormulaDto.dosis;
-    }
-    if (updateFormulaDto.questions) {
-      formula.questions = updateFormulaDto.questions;
+
+    if (updateFormulaDto.name) formula.name = updateFormulaDto.name;
+    if (updateFormulaDto.description) formula.description = updateFormulaDto.description;
+    if (updateFormulaDto.dosis) formula.dosis = updateFormulaDto.dosis;
+    if (updateFormulaDto.hasFollowUpNotifications !== undefined) {
+      formula.hasFollowUpNotifications = updateFormulaDto.hasFollowUpNotifications;
     }
 
     const updatedFormula = await formula.save();
@@ -162,7 +217,7 @@ export class FormulasService {
     return this.formulaModel
       .findById(updatedFormula._id)
       .populate('user', 'name phone role')
-      .select('name description dosis questions answers createdAt')
+      .populate('followUpQuestionBank')
       .exec();
   }
 
@@ -171,6 +226,9 @@ export class FormulasService {
     if (!formula) {
       throw new NotFoundException('Fórmula no encontrada');
     }
+
+    // Eliminar todas las respuestas de seguimiento relacionadas
+    await this.followUpResponseModel.deleteMany({ formula: formulaId });
 
     await this.userModel.findByIdAndUpdate(
       formula.user,
