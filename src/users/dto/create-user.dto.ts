@@ -1,4 +1,5 @@
-import { IsString, IsEnum, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 
 export enum UserRole {
   PATIENT = 'patient',
@@ -7,23 +8,46 @@ export enum UserRole {
 }
 
 export class CreateUserDto {
+  @ApiProperty({
+    description: 'Nombre completo del usuario',
+    example: 'Juan Pérez García',
+  })
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty({
+    description: 'Número de teléfono del usuario',
+    example: '+57 300 123 4567',
+  })
   @IsString()
   @IsNotEmpty()
   phone: string;
 
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-
+  @ApiProperty({
+    description: 'Número de cédula único del usuario',
+    example: '12345678',
+  })
   @IsString()
   @IsNotEmpty()
   cedula: string;
 
-  @IsEnum(UserRole)
+  @ApiProperty({
+    description: 'Contraseña del usuario',
+    example: 'password123',
+    minLength: 6,
+  })
+  @IsString()
   @IsNotEmpty()
-  role: UserRole;
+  password: string;
+
+  @ApiProperty({
+    description: 'Rol del usuario en el sistema',
+    enum: UserRole,
+    example: UserRole.PATIENT,
+    default: UserRole.PATIENT,
+  })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
 } 

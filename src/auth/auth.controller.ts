@@ -1,9 +1,9 @@
-import { Controller, Post, Body, UnauthorizedException, NotFoundException, InternalServerErrorException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
