@@ -25,7 +25,13 @@ export class HistorialService {
       throw new NotFoundException('Paciente no encontrado');
     }
 
-    const newHistorial = new this.historialModel(createHistorialDto);
+    // Si no se proporcionan sesiones trabajadas, inicializar como array vacío
+    const historialData = {
+      ...createHistorialDto,
+      sesionesTrabajadas: createHistorialDto.sesionesTrabajadas || []
+    };
+
+    const newHistorial = new this.historialModel(historialData);
     const savedHistorial = await newHistorial.save();
 
     // Agregar el historial al paciente
@@ -131,5 +137,64 @@ export class HistorialService {
 
   async findByPatient(patientId: string, user: any) {
     return await this.findByPatientId(patientId, user);
+  }
+
+  // Nuevo método para agregar una sesión trabajada a un historial existente
+  async addSesionTrabajada(historialId: string, sesionData: any, currentUser: any) {
+    if (currentUser.role !== UserRole.ADMIN && currentUser.role !== UserRole.DOCTOR) {
+      throw new ForbiddenException('Solo administradores y doctores pueden agregar sesiones');
+    }
+
+    const historial = await this.historialModel.findById(historialId);
+    if (!historial) {
+      throw new NotFoundException('Historial no encontrado');
+    }
+
+    const updatedHistorial = await this.historialModel
+      .findByIdAndUpdate(
+        historialId,
+        { $push: { sesionesTrabajadas: sesionData } },
+        { new: true }
+      )
+      .populate('patient', 'name phone cedula')
+      .exec();
+
+    return updatedHistorial;
+  }
+
+  // Método para eliminar una sesión trabajada específica
+  async removeSesionTrabajada(historialId: string, sesionIndex: number, currentUser: any) {
+    if (currentUser.role !== UserRole.ADMIN && currentUser.role !== UserRole.DOCTOR) {
+      throw new ForbiddenException('Solo administradores y doctores pueden eliminar sesiones');
+    }
+
+    const historial = await this.historialModel.findById(historialId);
+    if (!historial) {
+      throw new NotFoundException('Historial no encontrado');
+    }
+
+    // Verificar que el índice de la sesión sea válido
+    if (sesionIndex < 0 || sesionIndex >= historial.sesionesTrabajadas.length) {
+      throw new NotFoundException('Índice de sesión inválido');
+    }
+
+    // Obtener la sesión que se va a eliminar para devolverla en la respuesta
+    const sesionEliminada = historial.sesionesTrabajadas[sesionIndex];
+
+    // Eliminar la sesión usando $pull con el índice específico
+    const updatedHistorial = await this.historialModel
+      .findByIdAndUpdate(
+        historialId,
+        { $pull: { sesionesTrabajadas: { $in: [sesionEliminada] } } },
+        { new: true }
+      )
+      .populate('patient', 'name phone cedula')
+      .exec();
+
+    return {
+      message: 'Sesión eliminada correctamente',
+      sesionEliminada,
+      historial: updatedHistorial
+    };
   }
 } 

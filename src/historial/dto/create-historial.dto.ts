@@ -1,5 +1,32 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsDateString } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsDateString, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class SesionTrabajadaDto {
+  @ApiProperty({
+    description: 'Fecha de la sesión',
+    example: '2024-01-15T10:30:00Z',
+  })
+  @IsDateString()
+  @IsNotEmpty()
+  fechaSesion: Date;
+
+  @ApiProperty({
+    description: 'Descripción de lo que se hizo en la sesión',
+    example: 'Se realizó terapia de relajación y ejercicios de respiración',
+  })
+  @IsString()
+  @IsNotEmpty()
+  queSeHizo: string;
+
+  @ApiProperty({
+    description: 'Recomendaciones para la próxima sesión',
+    example: 'Continuar con ejercicios de respiración en casa, practicar meditación 10 minutos diarios',
+  })
+  @IsString()
+  @IsNotEmpty()
+  recomendacionesProximaSesion: string;
+}
 
 export class CreateHistorialDto {
   @ApiProperty({
@@ -11,32 +38,27 @@ export class CreateHistorialDto {
   patient: string;
 
   @ApiProperty({
-    description: 'Motivo principal de la consulta médica',
-    example: 'Dolor de cabeza persistente y fiebre',
+    description: 'Objetivo principal de la terapia',
+    example: 'Reducir la ansiedad y mejorar el manejo del estrés',
   })
   @IsString()
   @IsNotEmpty()
-  motivoConsulta: string;
+  objetivoDeTerapia: string;
 
   @ApiProperty({
-    description: 'Antecedentes médicos relevantes del paciente',
-    example: 'Hipertensión arterial, diabetes tipo 2',
+    description: 'Array de sesiones trabajadas con el paciente',
+    type: [SesionTrabajadaDto],
+    required: false,
   })
-  @IsString()
-  @IsNotEmpty()
-  antecedentes: string;
-
-  @ApiProperty({
-    description: 'Detalles específicos del diagnóstico y examen físico',
-    example: 'Paciente presenta cefalea tensional, signos vitales estables',
-  })
-  @IsString()
-  @IsNotEmpty()
-  detalles: string;
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SesionTrabajadaDto)
+  sesionesTrabajadas?: SesionTrabajadaDto[];
 
   @ApiProperty({
     description: 'Tratamiento médico recomendado',
-    example: 'Acetaminofén 500mg cada 8 horas, reposo, hidratación',
+    example: 'Terapia cognitivo-conductual semanal, ejercicios de relajación diarios',
   })
   @IsString()
   @IsNotEmpty()
