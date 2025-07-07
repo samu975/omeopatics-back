@@ -5,6 +5,7 @@ import { Historial } from '../schemas/historial.schema';
 import { User } from '../schemas/user.schema';
 import { CreateHistorialDto } from './dto/create-historial.dto';
 import { UpdateHistorialDto } from './dto/update-historial.dto';
+import { UpdateSesionTrabajadaDto } from './dto/update-sesion-trabajada.dto';
 import { UserRole } from '../users/dto/create-user.dto';
 
 @Injectable()
@@ -160,6 +161,51 @@ export class HistorialService {
       .exec();
 
     return updatedHistorial;
+  }
+
+  // Método para editar una sesión trabajada específica
+  async editSesionTrabajada(historialId: string, sesionIndex: number, updateSesionDto: UpdateSesionTrabajadaDto, currentUser: any) {
+    if (currentUser.role !== UserRole.ADMIN && currentUser.role !== UserRole.DOCTOR) {
+      throw new ForbiddenException('Solo administradores y doctores pueden editar sesiones');
+    }
+
+    const historial = await this.historialModel.findById(historialId);
+    if (!historial) {
+      throw new NotFoundException('Historial no encontrado');
+    }
+
+    // Verificar que el índice de la sesión sea válido
+    if (sesionIndex < 0 || sesionIndex >= historial.sesionesTrabajadas.length) {
+      throw new NotFoundException('Índice de sesión inválido');
+    }
+
+    // Obtener la sesión original para devolverla en la respuesta
+    const sesionOriginal = historial.sesionesTrabajadas[sesionIndex];
+
+    // Actualizar la sesión específica usando $set con el índice
+    const updatedHistorial = await this.historialModel
+      .findByIdAndUpdate(
+        historialId,
+        { 
+          $set: { 
+            [`sesionesTrabajadas.${sesionIndex}`]: {
+              fechaSesion: updateSesionDto.fechaSesion,
+              queSeHizo: updateSesionDto.queSeHizo,
+              recomendacionesProximaSesion: updateSesionDto.recomendacionesProximaSesion
+            }
+          } 
+        },
+        { new: true }
+      )
+      .populate('patient', 'name phone cedula')
+      .exec();
+
+    return {
+      message: 'Sesión editada correctamente',
+      sesionOriginal,
+      sesionActualizada: updatedHistorial.sesionesTrabajadas[sesionIndex],
+      historial: updatedHistorial
+    };
   }
 
   // Método para eliminar una sesión trabajada específica

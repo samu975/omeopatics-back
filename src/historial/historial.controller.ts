@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } 
 import { HistorialService } from './historial.service';
 import { CreateHistorialDto, SesionTrabajadaDto } from './dto/create-historial.dto';
 import { UpdateHistorialDto } from './dto/update-historial.dto';
+import { UpdateSesionTrabajadaDto } from './dto/update-sesion-trabajada.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Historial')
@@ -155,6 +156,47 @@ export class HistorialController {
   @Post(':id/sesiones')
   addSesionTrabajada(@Param('id') id: string, @Body() sesionData: SesionTrabajadaDto, @Request() req) {
     return this.historialService.addSesionTrabajada(id, sesionData, req.user);
+  }
+
+  @ApiOperation({
+    summary: 'Editar sesión trabajada del historial',
+    description: 'Editar una sesión trabajada específica de un historial médico. Solo accesible por Admin y Doctor.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del historial',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiParam({
+    name: 'sesionIndex',
+    description: 'Índice de la sesión a editar (0-based)',
+    example: '0',
+  })
+  @ApiBody({ type: UpdateSesionTrabajadaDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Sesión editada exitosamente',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - Solo Admin y Doctor pueden editar sesiones',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Historial no encontrado o índice de sesión inválido',
+  })
+  @Patch(':id/sesiones/:sesionIndex')
+  editSesionTrabajada(
+    @Param('id') id: string, 
+    @Param('sesionIndex') sesionIndex: string, 
+    @Body() updateSesionDto: UpdateSesionTrabajadaDto,
+    @Request() req
+  ) {
+    const index = parseInt(sesionIndex, 10);
+    if (isNaN(index) || index < 0) {
+      throw new Error('Índice de sesión debe ser un número válido mayor o igual a 0');
+    }
+    return this.historialService.editSesionTrabajada(id, index, updateSesionDto, req.user);
   }
 
   @ApiOperation({
