@@ -70,34 +70,39 @@ export class UsersService {
   }
 
   async assignAllPatientsToDoctor(doctorId: string) {
-    // Primero limpiamos los doctorId vacíos
-    await this.userModel.updateMany(
-      { 
-        role: 'patient', 
-        $or: [
-          { doctorId: '' },
-          { doctorId: { $regex: /^\s*$/ } } // Cadenas que solo contienen espacios
-        ]
-      },
-      { $unset: { doctorId: 1 } }
-    ).exec();
-
-    // Luego asignamos todos los pacientes sin doctor al doctor especificado
-    const result = await this.userModel.updateMany(
-      { 
-        role: 'patient', 
-        $or: [
-          { doctorId: { $exists: false } },
-          { doctorId: null }
-        ]
-      },
-      { doctorId }
-    ).exec();
-    
-    return {
-      message: `Se asignaron ${result.modifiedCount} pacientes al doctor`,
-      modifiedCount: result.modifiedCount
-    };
+    try {
+      // Primero, obtenemos todos los pacientes
+      const allPatients = await this.userModel.find({ role: 'patient' }).exec();
+      
+      let updatedCount = 0;
+      
+      // Iteramos sobre cada paciente y verificamos su doctorId
+      for (const patient of allPatients) {
+        const currentDoctorId = patient.doctorId;
+        
+        // Si no tiene doctorId, o es una cadena vacía, o es null, lo asignamos
+        if (!currentDoctorId || 
+            currentDoctorId === '' || 
+            currentDoctorId === null || 
+            currentDoctorId === undefined) {
+          
+          await this.userModel.findByIdAndUpdate(
+            patient._id,
+            { doctorId }
+          ).exec();
+          
+          updatedCount++;
+        }
+      }
+      
+      return {
+        message: `Se asignaron ${updatedCount} pacientes al doctor`,
+        modifiedCount: updatedCount
+      };
+    } catch (error) {
+      console.error('Error en assignAllPatientsToDoctor:', error);
+      throw error;
+    }
   }
 
   async findByPhone(phone: string) {
