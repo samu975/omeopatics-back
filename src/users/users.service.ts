@@ -24,7 +24,7 @@ export class UsersService {
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
       let assignedDoctorId = doctorId;
-      if (role === 'patient' && !doctorId) {
+      if (role === 'patient' && (!doctorId || doctorId.trim() === '')) {
         assignedDoctorId = '686c35713783f191a976446e';
       }
       const createdUser = new this.userModel({
@@ -34,7 +34,7 @@ export class UsersService {
         password: hashedPassword,
         role,
         loveLanguagesTestEnabled: loveLanguagesTestEnabled ?? false,
-        doctorId: assignedDoctorId ?? undefined,
+        doctorId: assignedDoctorId && assignedDoctorId.trim() !== '' ? assignedDoctorId : undefined,
       });
 
       return await createdUser.save();
@@ -70,14 +70,25 @@ export class UsersService {
   }
 
   async assignAllPatientsToDoctor(doctorId: string) {
-    // Asigna todos los pacientes sin doctor al doctor especificado
+    // Primero limpiamos los doctorId vacíos
+    await this.userModel.updateMany(
+      { 
+        role: 'patient', 
+        $or: [
+          { doctorId: '' },
+          { doctorId: { $regex: /^\s*$/ } } // Cadenas que solo contienen espacios
+        ]
+      },
+      { $unset: { doctorId: 1 } }
+    ).exec();
+
+    // Luego asignamos todos los pacientes sin doctor al doctor especificado
     const result = await this.userModel.updateMany(
       { 
         role: 'patient', 
         $or: [
           { doctorId: { $exists: false } },
-          { doctorId: null },
-          { doctorId: '' }
+          { doctorId: null }
         ]
       },
       { doctorId }
