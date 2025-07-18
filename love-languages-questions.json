@@ -1,0 +1,137 @@
+[
+  {
+    "categoria": "Palabras de afirmación",
+    "recibirAmor": [
+      "Me siento profundamente amado/a cuando mi pareja me dice lo orgullosa/o que está de mí.",
+      "Valoro mucho que me recuerden lo que significo en su vida.",
+      "Las palabras de aliento me levantan más que cualquier regalo.",
+      "Necesito escuchar verbalmente que soy amado/a.",
+      "Me emociona que mi pareja reconozca mis esfuerzos con palabras sinceras.",
+      "Me gusta recibir mensajes escritos o notas con frases bonitas.",
+      "Me siento amado/a cuando me agradecen lo que hago.",
+      "Necesito que me digan que soy suficiente.",
+      "Me reconforta que mi pareja diga que confía en mí.",
+      "Las palabras tiernas o coquetas hacen que me sienta especial."
+    ],
+    "expresarAmor": [
+      "Expreso mi amor diciendo cosas bonitas y reconociendo a mi pareja.",
+      "Me gusta recordarle a mi pareja cuánto la amo.",
+      "Suelo escribir cartas o mensajes afectivos.",
+      "Elogio a mi pareja frente a otras personas.",
+      "Digo lo que admiro de mi pareja con frecuencia.",
+      "Uso palabras para sanar o consolar cuando hay conflicto.",
+      "Agradezco verbalmente lo que mi pareja hace.",
+      "Le hago saber a mi pareja que es única en mi vida.",
+      "Digo con frecuencia lo mucho que me importa.",
+      "No me guardo los cumplidos: me encanta verbalizarlos."
+    ]
+  },
+  {
+    "categoria": "Actos de servicio",
+    "recibirAmor": [
+      "Me siento amado/a cuando hacen cosas por mí sin que lo pida.",
+      "Valoro que se encarguen de tareas cuando estoy agotado/a.",
+      "Me siento cuidado/a cuando cocinan o limpian para mí.",
+      "Me hace feliz que me ayuden con mis responsabilidades.",
+      "Me encanta cuando mi pareja se anticipa a mis necesidades.",
+      "Me siento especial cuando me resuelven un problema.",
+      "Me reconforta que colaboren conmigo en momentos de estrés.",
+      "Valoro que tengan gestos de ayuda cuando no me siento bien.",
+      "Agradezco los actos que alivian mi carga diaria.",
+      "Me enamora que se esfuercen por hacerme la vida más fácil."
+    ],
+    "expresarAmor": [
+      "Me gusta demostrar amor haciendo cosas útiles por mi pareja.",
+      "Cocino, limpio o arreglo cosas para mostrar cariño.",
+      "Me esfuerzo en ayudar sin que me lo pidan.",
+      "Me nace colaborar con tareas para aliviar su día.",
+      "Planifico detalles prácticos para su bienestar.",
+      "Me preocupo por resolverle cosas pendientes.",
+      "Me siento feliz de servir a quien amo.",
+      "Me esfuerzo por estar disponible cuando necesita algo.",
+      "Me gusta sorprenderle con tareas hechas.",
+      "Creo que el amor se demuestra haciendo, no solo diciendo."
+    ]
+  },
+  {
+    "categoria": "Regalos",
+    "recibirAmor": [
+      "Me siento valorado/a cuando me dan un regalo significativo.",
+      "Aprecio cuando alguien me da algo que pensó especialmente para mí.",
+      "Me emociona recibir un detalle, sin importar su valor.",
+      "Un regalo inesperado me hace sentir especial.",
+      "Disfruto cuando mi pareja me obsequia cosas que me gustan.",
+      "Me encanta recibir regalos simbólicos o hechos a mano.",
+      "Guardo con cariño los regalos importantes.",
+      "Me hace sentir recordado/a un regalo bien elegido.",
+      "Asocio los detalles materiales con afecto.",
+      "Me importa más el gesto que el objeto en sí."
+    ],
+    "expresarAmor": [
+      "Me gusta sorprender a mi pareja con regalos.",
+      "Pienso con cuidado los detalles que le ofrezco.",
+      "Compro cosas que sé que le harán feliz.",
+      "Me gusta regalar sin motivo.",
+      "Creo que los regalos son una forma de decir “te amo”.",
+      "Me encanta ver la cara de alegría al dar un obsequio.",
+      "Personalizo lo que regalo para que tenga más valor emocional.",
+      "Invierto tiempo y/o dinero en regalos que signifiquen algo.",
+      "Disfruto crear o buscar cosas especiales para regalar.",
+      "Elijo regalar como forma de conexión emocional."
+    ]
+  },
+  {
+    "categoria": "Tiempo de calidad",
+    "recibirAmor": [
+      "Me siento amado/a cuando mi pareja me dedica tiempo solo para mí.",
+      "Disfruto que me escuchen sin distracciones.",
+      "Me gusta compartir conversaciones profundas.",
+      "Me encanta que planeen actividades juntos/as.",
+      "Valoro que el tiempo juntos sea intencional y significativo.",
+      "Me hace feliz cuando dejan el celular para prestarme atención.",
+      "Me nutre emocionalmente compartir hobbies o intereses.",
+      "Me gusta sentir que soy prioridad en su agenda.",
+      "Me reconforta pasar tiempo sin hacer nada, solo estando juntos/as.",
+      "Me emociona cuando se esfuerzan por estar presentes de verdad."
+    ],
+    "expresarAmor": [
+      "Reservo tiempo exclusivo para estar con mi pareja.",
+      "Me gusta planear citas o actividades juntos/as.",
+      "Escucho activamente cuando me comparte cosas.",
+      "Apago el celular cuando estamos juntos.",
+      "Hago todo lo posible por estar presente emocionalmente.",
+      "Busco momentos para hablar sin prisa.",
+      "Me interesa pasar tiempo de calidad más que cantidad.",
+      "Disfruto ver películas, salir o simplemente caminar juntos/as.",
+      "Me esfuerzo en mantener una conexión profunda en nuestro tiempo juntos.",
+      "Me gusta crear recuerdos con mi pareja."
+    ]
+  },
+  {
+    "categoria": "Contacto físico (Kinestésico)",
+    "recibirAmor": [
+      "Me siento amado/a cuando me abrazan con frecuencia.",
+      "Los besos y caricias me reconfortan profundamente.",
+      "Me gusta que me toquen cuando hablamos.",
+      "Valoro la cercanía física en momentos difíciles.",
+      "Me hace feliz que me tomen de la mano en público.",
+      "Disfruto dormir en contacto físico.",
+      "Me emociona un simple roce de cariño.",
+      "Me tranquiliza el contacto físico afectivo.",
+      "Me siento más seguro/a con abrazos.",
+      "Necesito contacto físico para sentirme amado/a."
+    ],
+    "expresarAmor": [
+      "Acaricio y toco con frecuencia a mi pareja.",
+      "Me gusta abrazar para consolar o alegrar.",
+      "Doy besos espontáneos como expresión de amor.",
+      "Busco estar cerca físicamente.",
+      "Uso el cuerpo para expresar lo que siento.",
+      "Acompaño mis palabras con gestos afectivos.",
+      "Me gusta mimar a mi pareja con contacto suave.",
+      "Elijo estar pegado/a, no importa el lugar.",
+      "Abrazo como acto de conexión.",
+      "Transmito ternura con mi cuerpo."
+    ]
+  }
+] 

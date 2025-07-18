@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsEnum, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
 
 export enum UserRole {
   PATIENT = 'patient',
@@ -50,4 +50,9 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
+
+  @ApiPropertyOptional({ description: 'Habilita el test de lenguajes del amor para el usuario', default: false })
+  @IsOptional()
+  @IsBoolean()
+  loveLanguagesTestEnabled?: boolean;
 } 

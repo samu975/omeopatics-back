@@ -21,6 +21,10 @@ export class User extends Document {
   @Prop({ required: true, enum: UserRole, default: UserRole.PATIENT })
   role: UserRole;
 
+  // Habilita o deshabilita el test de lenguajes del amor para el usuario
+  @Prop({ type: Boolean, default: false })
+  loveLanguagesTestEnabled: boolean;
+
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Formula' }] })
   asignedFormulas: Formula[];
 

@@ -10,7 +10,7 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { name, phone, password, cedula, role } = createUserDto;
+    const { name, phone, password, cedula, role, loveLanguagesTestEnabled } = createUserDto;
     
     const existingUser = await this.userModel.findOne({ cedula }).exec();
     if (existingUser) {
@@ -30,6 +30,7 @@ export class UsersService {
         cedula,
         password: hashedPassword,
         role,
+        loveLanguagesTestEnabled: loveLanguagesTestEnabled ?? false,
       });
 
       return await createdUser.save();
@@ -67,7 +68,6 @@ export class UsersService {
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
-
     return this.userModel
       .findByIdAndUpdate(id, updateUserDto, { new: true })
       .exec();

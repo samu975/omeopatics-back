@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { FormulasModule } from './formulas/formulas.module';
 import { HistorialModule } from './historial/historial.module';
 import { QuestionBanksModule } from './question-banks/question-banks.module';
+import { LoveLanguagesModule } from './love-languages/love-languages.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { QuestionBanksModule } from './question-banks/question-banks.module';
     FormulasModule,
     HistorialModule,
     QuestionBanksModule,
+    LoveLanguagesModule,
   ],
   controllers: [],
   providers: [],
