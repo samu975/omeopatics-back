@@ -56,6 +56,12 @@ export class UsersController {
     return this.usersService.assignPatientToDoctor(patientId, doctorId);
   }
 
+  @Patch('assign-all/:doctorId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async assignAllPatientsToDoctor(@Param('doctorId') doctorId: string) {
+    return this.usersService.assignAllPatientsToDoctor(doctorId);
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.usersService.remove(id);

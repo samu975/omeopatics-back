@@ -69,6 +69,26 @@ export class UsersService {
     ).exec();
   }
 
+  async assignAllPatientsToDoctor(doctorId: string) {
+    // Asigna todos los pacientes sin doctor al doctor especificado
+    const result = await this.userModel.updateMany(
+      { 
+        role: 'patient', 
+        $or: [
+          { doctorId: { $exists: false } },
+          { doctorId: null },
+          { doctorId: '' }
+        ]
+      },
+      { doctorId }
+    ).exec();
+    
+    return {
+      message: `Se asignaron ${result.modifiedCount} pacientes al doctor`,
+      modifiedCount: result.modifiedCount
+    };
+  }
+
   async findByPhone(phone: string) {
     return this.userModel.findOne({ phone }).exec();
   }
