@@ -10,7 +10,7 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { name, phone, password, cedula, role, loveLanguagesTestEnabled } = createUserDto;
+    const { name, phone, password, cedula, role, loveLanguagesTestEnabled, doctorId } = createUserDto;
     
     const existingUser = await this.userModel.findOne({ cedula }).exec();
     if (existingUser) {
@@ -23,7 +23,10 @@ export class UsersService {
     
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      
+      let assignedDoctorId = doctorId;
+      if (role === 'patient' && !doctorId) {
+        assignedDoctorId = '686c35713783f191a976446e';
+      }
       const createdUser = new this.userModel({
         name,
         phone,
@@ -31,6 +34,7 @@ export class UsersService {
         password: hashedPassword,
         role,
         loveLanguagesTestEnabled: loveLanguagesTestEnabled ?? false,
+        doctorId: assignedDoctorId ?? undefined,
       });
 
       return await createdUser.save();
@@ -40,12 +44,29 @@ export class UsersService {
     }
   }
 
-  async findAll() {
-    const patients = await this.userModel.find({ role: 'patient' }).exec();
+  async findAll(doctorId?: string, isAdmin?: boolean) {
+    if (isAdmin) {
+      // Devuelve todos los usuarios (pacientes y doctores)
+      return this.userModel.find({}).exec();
+    }
+    const filter: any = { role: 'patient' };
+    if (doctorId) {
+      filter.doctorId = doctorId;
+    }
+    const patients = await this.userModel.find(filter).exec();
     if (!patients.length) {
       throw new NotFoundException('No se encontraron pacientes');
     }
     return patients;
+  }
+
+  async assignPatientToDoctor(patientId: string, doctorId: string) {
+    // Asigna el paciente al doctor
+    return this.userModel.findByIdAndUpdate(
+      patientId,
+      { doctorId },
+      { new: true }
+    ).exec();
   }
 
   async findByPhone(phone: string) {

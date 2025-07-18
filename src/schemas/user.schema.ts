@@ -25,6 +25,9 @@ export class User extends Document {
   @Prop({ type: Boolean, default: false })
   loveLanguagesTestEnabled: boolean;
 
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: false })
+  doctorId?: string;
+
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Formula' }] })
   asignedFormulas: Formula[];
 

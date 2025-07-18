@@ -55,4 +55,9 @@ export class CreateUserDto {
   @IsOptional()
   @IsBoolean()
   loveLanguagesTestEnabled?: boolean;
+
+  @ApiPropertyOptional({ description: 'ID del doctor asignado al paciente', example: '665f1b2c3a4d5e6f7a8b9c0d' })
+  @IsOptional()
+  @IsString()
+  doctorId?: string;
 } 
