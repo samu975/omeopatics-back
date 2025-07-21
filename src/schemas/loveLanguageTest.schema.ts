@@ -14,6 +14,9 @@ export class LoveLanguageTest extends Document {
 
   @Prop({ type: Array, default: [] })
   scores: number[]; // Puntuación por grupo
+
+  @Prop({ type: Boolean, default: false })
+  isCompleted: boolean; // Indica si el usuario ha completado todas las categorías
 }
 
 export const LoveLanguageTestSchema = SchemaFactory.createForClass(LoveLanguageTest); 

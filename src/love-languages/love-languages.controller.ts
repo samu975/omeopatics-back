@@ -28,6 +28,20 @@ export class LoveLanguagesController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('patient')
+  @Post('category-answers')
+  saveCategoryAnswers(@Req() req, @Body() body) {
+    return this.loveLanguagesService.saveCategoryAnswers(req.user.userId, body);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('patient')
+  @Get('progress')
+  getProgress(@Req() req) {
+    return this.loveLanguagesService.getProgress(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('patient')
   @Patch('reset')
   resetAnswers(@Req() req) {
     return this.loveLanguagesService.resetAnswers(req.user.userId);
