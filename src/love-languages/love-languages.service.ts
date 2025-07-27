@@ -29,46 +29,46 @@ export class LoveLanguagesService {
     
     let test = await this.loveLanguageTestModel.findOne({ user: userId });
     if (!test) {
-      test = new this.loveLanguageTestModel({ 
-        user: userId, 
-        answers: [], 
-        scores: [],
-        isCompleted: false 
-      });
+        test = new this.loveLanguageTestModel({ 
+            user: userId, 
+            answers: [], 
+            scores: [],
+            isCompleted: false 
+        });
+        await test.save();
     }
-
-    // Buscar si ya existe la categoría en las respuestas
     const existingCategoryIndex = test.answers.findIndex(
-      (cat: any) => cat.categoria === categoryData.categoria
+        (cat: any) => cat.categoria === categoryData.categoria
     );
 
     let updatedAnswers;
     if (existingCategoryIndex >= 0) {
-      // Actualizar categoría existente
-      updatedAnswers = [...test.answers];
-      updatedAnswers[existingCategoryIndex] = categoryData;
+        console.log('Actualizando categoría existente en índice:', existingCategoryIndex);
+        updatedAnswers = [...test.answers];
+        updatedAnswers[existingCategoryIndex] = categoryData;
     } else {
-      // Agregar nueva categoría
-      updatedAnswers = [...test.answers, categoryData];
+        console.log('Agregando nueva categoría');
+        updatedAnswers = [...test.answers, categoryData];
     }
 
-    // Verificar si ha completado todas las categorías (5 categorías)
     const questions = this.getQuestions();
     const isCompleted = updatedAnswers.length === questions.length;
 
-    // Usar findByIdAndUpdate para asegurar que se guarden los cambios
     const updatedTest = await this.loveLanguageTestModel.findByIdAndUpdate(
-      test._id,
-      {
-        answers: updatedAnswers,
-        isCompleted: isCompleted
-      },
-      { new: true }
+        test._id,
+        {
+            answers: updatedAnswers,
+            isCompleted: isCompleted
+        },
+        { new: true }
     );
 
-    return updatedTest;
-  }
+    if (!updatedTest) {
+        throw new Error('Error al actualizar el test. El test no fue encontrado.');
+    }
 
+    return updatedTest;
+}
   async saveAnswers(userId: string, answers: any) {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('Usuario no encontrado');
