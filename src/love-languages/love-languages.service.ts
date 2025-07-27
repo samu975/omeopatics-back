@@ -42,20 +42,31 @@ export class LoveLanguagesService {
       (cat: any) => cat.categoria === categoryData.categoria
     );
 
+    let updatedAnswers;
     if (existingCategoryIndex >= 0) {
       // Actualizar categoría existente
-      test.answers[existingCategoryIndex] = categoryData;
+      updatedAnswers = [...test.answers];
+      updatedAnswers[existingCategoryIndex] = categoryData;
     } else {
       // Agregar nueva categoría
-      test.answers.push(categoryData);
+      updatedAnswers = [...test.answers, categoryData];
     }
 
     // Verificar si ha completado todas las categorías (5 categorías)
     const questions = this.getQuestions();
-    test.isCompleted = test.answers.length === questions.length;
+    const isCompleted = updatedAnswers.length === questions.length;
 
-    await test.save();
-    return test;
+    // Usar findByIdAndUpdate para asegurar que se guarden los cambios
+    const updatedTest = await this.loveLanguageTestModel.findByIdAndUpdate(
+      test._id,
+      {
+        answers: updatedAnswers,
+        isCompleted: isCompleted
+      },
+      { new: true }
+    );
+
+    return updatedTest;
   }
 
   async saveAnswers(userId: string, answers: any) {
@@ -96,7 +107,16 @@ export class LoveLanguagesService {
   async getResults(userId: string) {
     const test = await this.loveLanguageTestModel.findOne({ user: userId });
     if (!test) throw new NotFoundException('No hay test para este usuario');
-    return { scores: test.scores, isCompleted: test.isCompleted };
+    if (!test.isCompleted) {
+      return { scores: [], isCompleted: false };
+    }
+    // Calcular puntajes en base a las respuestas actuales
+    const scores = test.answers.map((cat: any) => {
+      const recibir = Array.isArray(cat.recibirAmor) ? cat.recibirAmor.reduce((a, b) => a + b, 0) : 0;
+      const expresar = Array.isArray(cat.expresarAmor) ? cat.expresarAmor.reduce((a, b) => a + b, 0) : 0;
+      return { categoria: cat.categoria, recibirAmor: recibir, expresarAmor: expresar, total: recibir + expresar };
+    });
+    return { scores, isCompleted: true };
   }
 
   async getProgress(userId: string) {

@@ -23,34 +23,34 @@ export class LoveLanguagesController {
   @Roles('patient')
   @Post('answers')
   saveAnswers(@Req() req, @Body() body) {
-    return this.loveLanguagesService.saveAnswers(req.user.userId, body.answers);
+    return this.loveLanguagesService.saveAnswers(req.user._id, body.answers);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('patient')
   @Post('category-answers')
   saveCategoryAnswers(@Req() req, @Body() body) {
-    return this.loveLanguagesService.saveCategoryAnswers(req.user.userId, body);
+    return this.loveLanguagesService.saveCategoryAnswers(req.user._id, body);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('patient')
   @Get('progress')
   getProgress(@Req() req) {
-    return this.loveLanguagesService.getProgress(req.user.userId);
+    return this.loveLanguagesService.getProgress(req.user._id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('patient')
   @Patch('reset')
   resetAnswers(@Req() req) {
-    return this.loveLanguagesService.resetAnswers(req.user.userId);
+    return this.loveLanguagesService.resetAnswers(req.user._id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('patient')
   @Get('results')
   getResults(@Req() req) {
-    return this.loveLanguagesService.getResults(req.user.userId);
+    return this.loveLanguagesService.getResults(req.user._id);
   }
 } 
