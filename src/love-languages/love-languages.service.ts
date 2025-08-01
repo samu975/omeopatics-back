@@ -43,13 +43,18 @@ export class LoveLanguagesService {
 
     let updatedAnswers;
     if (existingCategoryIndex >= 0) {
-        console.log('Actualizando categoría existente en índice:', existingCategoryIndex);
         updatedAnswers = [...test.answers];
         updatedAnswers[existingCategoryIndex] = categoryData;
     } else {
-        console.log('Agregando nueva categoría');
         updatedAnswers = [...test.answers, categoryData];
     }
+
+    // Calcular puntajes por cada subgrupo y total por categoría
+    const updatedScores = updatedAnswers.map((cat: any) => {
+      const recibir = Array.isArray(cat.recibirAmor) ? cat.recibirAmor.reduce((a, b) => a + b, 0) : 0;
+      const expresar = Array.isArray(cat.expresarAmor) ? cat.expresarAmor.reduce((a, b) => a + b, 0) : 0;
+      return { categoria: cat.categoria, recibirAmor: recibir, expresarAmor: expresar, total: recibir + expresar };
+    });
 
     const questions = this.getQuestions();
     const isCompleted = updatedAnswers.length === questions.length;
@@ -58,6 +63,7 @@ export class LoveLanguagesService {
         test._id,
         {
             answers: updatedAnswers,
+            scores: updatedScores,
             isCompleted: isCompleted
         },
         { new: true }
@@ -76,22 +82,32 @@ export class LoveLanguagesService {
     let test = await this.loveLanguageTestModel.findOne({ user: userId });
     if (!test) {
       test = new this.loveLanguageTestModel({ user: userId, answers: [], scores: [], isCompleted: false });
+      await test.save();
     }
     // answers debe ser un array de objetos: { categoria, recibirAmor: [números], expresarAmor: [números] }
-    test.answers = answers;
+    const updatedAnswers = answers;
     // Calcular puntajes por cada subgrupo y total por categoría
-    test.scores = answers.map((cat: any) => {
+    const updatedScores = updatedAnswers.map((cat: any) => {
       const recibir = Array.isArray(cat.recibirAmor) ? cat.recibirAmor.reduce((a, b) => a + b, 0) : 0;
       const expresar = Array.isArray(cat.expresarAmor) ? cat.expresarAmor.reduce((a, b) => a + b, 0) : 0;
       return { categoria: cat.categoria, recibirAmor: recibir, expresarAmor: expresar, total: recibir + expresar };
     });
-    
     // Verificar si ha completado todas las categorías
     const questions = this.getQuestions();
-    test.isCompleted = answers.length === questions.length;
-    
-    await test.save();
-    return test;
+    const isCompleted = updatedAnswers.length === questions.length;
+    const updatedTest = await this.loveLanguageTestModel.findByIdAndUpdate(
+      test._id,
+      {
+        answers: updatedAnswers,
+        scores: updatedScores,
+        isCompleted: isCompleted
+      },
+      { new: true }
+    );
+    if (!updatedTest) {
+      throw new Error('Error al actualizar el test. El test no fue encontrado.');
+    }
+    return updatedTest;
   }
 
   async resetAnswers(userId: string) {
@@ -141,4 +157,60 @@ export class LoveLanguagesService {
       completedCategories: test.answers.length
     };
   }
-} 
+
+  // Comparar resultados de lenguaje del amor entre usuario y pareja
+  async compareWithPartner(userId: string, partnerCedula: string) {
+    // Buscar usuario actual
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    if (!user.loveLanguagesTestEnabled) throw new ForbiddenException('Test no habilitado para este usuario');
+
+    // Buscar pareja por cedula
+    const partner = await this.userModel.findOne({ cedula: partnerCedula });
+    if (!partner) {
+      throw new NotFoundException('Pareja no encontrada');
+    }
+    if (!partner.loveLanguagesTestEnabled) throw new ForbiddenException('Test no habilitado para la pareja');
+
+    // Buscar test de usuario
+    const userTest = await this.loveLanguageTestModel.findOne({ user: userId });
+    if (!userTest || !userTest.isCompleted) {
+      throw new NotFoundException('El usuario no ha completado el test de lenguaje del amor');
+    }
+    // Buscar test de pareja
+    const partnerTest = await this.loveLanguageTestModel.findOne({ user: partner._id });
+
+    // Si los scores están vacíos, los calculo dinámicamente
+    const calculateScores = (answers: any[]) => {
+      if (!answers || !Array.isArray(answers)) return [];
+      return answers.map((cat: any) => {
+        const recibir = Array.isArray(cat.recibirAmor) ? cat.recibirAmor.reduce((a, b) => a + b, 0) : 0;
+        const expresar = Array.isArray(cat.expresarAmor) ? cat.expresarAmor.reduce((a, b) => a + b, 0) : 0;
+        return { categoria: cat.categoria, recibirAmor: recibir, expresarAmor: expresar };
+      });
+    };
+
+    const userScores = (userTest.scores && userTest.scores.length > 0)
+      ? userTest.scores
+      : calculateScores(userTest.answers);
+    const partnerScores = (partnerTest.scores && partnerTest.scores.length > 0)
+      ? partnerTest.scores
+      : calculateScores(partnerTest.answers);
+
+    // Retornar ambos resultados
+    return {
+      user: {
+        id: user._id,
+        nombre: user.get('nombre'),
+        cedula: user.get('cedula'),
+        scores: userScores,
+      },
+      partner: {
+        id: partner._id,
+        nombre: partner.get('nombre'),
+        cedula: partner.get('cedula'),
+        scores: partnerScores,
+      }
+    };
+  }
+}

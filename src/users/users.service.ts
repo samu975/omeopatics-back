@@ -14,10 +14,6 @@ export class UsersService {
     
     const existingUser = await this.userModel.findOne({ cedula }).exec();
     if (existingUser) {
-      console.log('Usuario existente encontrado:', {
-        cedula: existingUser.cedula,
-        phone: existingUser.phone
-      });
       throw new ConflictException('Ya existe un usuario registrado con este número de cédula');
     }
     
