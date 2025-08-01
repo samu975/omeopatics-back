@@ -201,14 +201,14 @@ export class LoveLanguagesService {
     return {
       user: {
         id: user._id,
-        nombre: user.get('nombre'),
-        cedula: user.get('cedula'),
+        nombre: user.name || user.get('nombre'),
+        cedula: user.cedula || user.get('cedula'),
         scores: userScores,
       },
       partner: {
         id: partner._id,
-        nombre: partner.get('nombre'),
-        cedula: partner.get('cedula'),
+        nombre: partner.name || partner.get('nombre'),
+        cedula: partner.cedula || partner.get('cedula'),
         scores: partnerScores,
       }
     };
